@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Video Call</title>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="video-container">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="localVideo" autoplay playsinline muted></video>
+      <div id="call-controls">
+        <button id="muteButton" class="btn waves-effect waves-light">
+          <i class="material-icons">mic</i>
+        </button>
+        <button id="cameraButton" class="btn waves-effect waves-light">
+          <i class="material-icons">videocam</i>
+        </button>
+        <button
+          id="endCallButton"
+          class="btn red darken-2 waves-effect waves-light"
+        >
+          <i class="material-icons">call_end</i>
+        </button>
+      </div>
+    </div>
+
+    <div id="controls">
+      <div class="input-field col s3">
+         <a id="videoDeviceSelectTrigger" class='dropdown-trigger btn' href='#' data-target='videoDeviceSelect'>Select Video Device</a>
+         <ul id='videoDeviceSelect' class='dropdown-content'>
+       
+         
+        </ul>
+      </div>
+      <div class="input-field col s3">
+        <input placeholder="Placeholder" id="sourceId" type="text" readonly />
+        <label for="sourceId">Your Id</label>
+      </div>
+      <div class="input-field col s3">
+        <input type="text" id="targetId" placeholder="Enter Target ID" />
+      </div>
+      <div class="input-field col s3">
+        <button id="startCallButton" class="btn waves-effect waves-light">
+          <i class="material-icons left">call</i>Start Call
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="receivingCallModal" class="modal">
+      <div class="modal-content">
+        <h4>Incoming Call</h4>
+        <p id="modalText">Receiving call from <label id="incomingClientId"></label>...</p>
+      </div>
+      <div class="modal-footer">
+        <button id="acceptCall" class="btn green waves-effect waves-light">
+          <i class="material-icons left">check</i>Accept
+        </button>
+        <button id="rejectCall" class="btn red waves-effect waves-light">
+          <i class="material-icons left">close</i>Reject
+        </button>
+      </div>
+    </div>
+
+    <div id="callingModal" class="modal">
+      <div class="modal-content">
+        <h4>Calling...</h4>
+        <p id="modalText">Waiting for the recipient to answer...</p>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelCallButton" class="btn red waves-effect waves-light">
+          <i class="material-icons left">cancel</i>Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Carregar o JavaScript principal -->
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
