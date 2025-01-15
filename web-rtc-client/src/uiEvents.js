@@ -3,11 +3,10 @@ import {
   endCall,
   acceptCall,
   rejectCall,
-  videoDevices,
-  defaultDeviceId,
+  getVideoDevices,
   toggleAudio,
   toggleCamera,
-  cancelCall
+  cancelCall,
 } from "./rtc";
 import {
   muteButton,
@@ -23,38 +22,35 @@ import {
   rejectCallButton,
   receivingCallModal,
   cancelCallButton,
-  callingModal
+  callingModal,
 } from "./uiControls";
 import { playRinging, playStartCall, stopRinging, playEndCall } from "./fx";
 
-let isMuted = false;
-let cameraDisabled = false;
 let videoDeviceDropdown;
-
 
 M.Modal.init(modalElems);
 M.Dropdown.init(dropdownElems, { coverTrigger: false });
 initializeVideoDeviceSelect();
 
-function initializeVideoDeviceSelect() {
-  const videoDeviceOptions = videoDevices
-    .map(
-      (device) =>
-        `<li data-device-id="${device.deviceId}"><a>${device.label}</a></li>`
-    )
-    .join("");
-
-  videoDeviceSelect.innerHTML = videoDeviceOptions;
-
+async function initializeVideoDeviceSelect() {
   videoDeviceDropdown = M.Dropdown.init(videoDeviceSelectTrigger, {
+    onOpenStart: async function () {
+      const videoDeviceOptions = (await getVideoDevices())
+        .map(
+          (device) =>
+            `<li data-device-id="${device.deviceId}"><a>${device.label}</a></li>`
+        )
+        .join("");
+
+      videoDeviceSelect.innerHTML = videoDeviceOptions;
+    },
     onItemClick: function (item) {
       this.selectedItem = item;
     },
   });
 }
 
-
-startCallButton.addEventListener("click", () => {
+startCallButton.addEventListener("click", async () => {
   const remoteClientId = targetIdInput.value.trim();
 
   if (!remoteClientId) {
@@ -70,36 +66,36 @@ startCallButton.addEventListener("click", () => {
   instance.open();
 
   playRinging();
- 
-  const deviceId = videoDeviceDropdown.selectedItem?.dataset?.deviceId || defaultDeviceId;
+
+  const deviceId =
+    videoDeviceDropdown.selectedItem?.dataset?.deviceId ||
+    (await getVideoDevices())[0].deviceId;
 
   initiateCall(remoteClientId, deviceId);
-  
+
+  startCallButton.disabled = true;
+  endCallButton.disabled = false;
 });
 
 muteButton.addEventListener("click", () => {
-  const newIcon = isMuted ? "mic" : "mic_off";
-  muteButton.innerHTML = `<i class="material-icons">${newIcon}</i>`;
-  isMuted = !isMuted;
-  
-  toggleAudio(isMuted);
+  const icon = muteButton.querySelector("i");
+  icon.innerHTML = icon.innerHTML === "mic_off" ? "mic" : "mic_off";
+  toggleAudio();
 });
 
 cameraButton.addEventListener("click", () => {
-  const newIcon = cameraDisabled ? "videocam" : "videocam_off";
-  cameraButton.innerHTML = `<i class="material-icons">${newIcon}</i>`;
-  cameraDisabled = !cameraDisabled;
-  toggleCamera(cameraDisabled);
-
+  const icon = cameraButton.querySelector("i");
+  icon.innerHTML =
+    icon.innerHTML === "videocam_off" ? "videocam" : "videocam_off";
+  toggleCamera();
 });
 
 endCallButton.addEventListener("click", () => {
   targetIdInput.value = "";
-  endCall(); 
+  endCall();
   stopRinging();
-  playEndCall(); 
+  playEndCall();
 });
-
 
 cancelCallButton.addEventListener("click", () => {
   const instance = M.Modal.getInstance(callingModal);
@@ -109,15 +105,19 @@ cancelCallButton.addEventListener("click", () => {
   cancelCall();
 });
 
-acceptCallButton.addEventListener("click", () => {
+acceptCallButton.addEventListener("click", async () => {
   const instance = M.Modal.getInstance(receivingCallModal);
   instance.close();
+
   const deviceId =
-    videoDeviceDropdown.selectedItem?.dataset?.deviceId || defaultDeviceId;
+    videoDeviceDropdown.selectedItem?.dataset?.deviceId ||
+    (await getVideoDevices())[0].deviceId;
   acceptCall(deviceId);
   stopRinging();
   playStartCall();
 
+  startCallButton.disabled = true;
+  endCallButton.disabled = false;
 });
 
 rejectCallButton.addEventListener("click", () => {

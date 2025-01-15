@@ -1,4 +1,10 @@
-import { sourceIdInput, receivingCallModal, callingModal, targetIdInput, incomingClientIdLabel } from "./uiControls";
+import {
+  sourceIdInput,
+  receivingCallModal,
+  callingModal,
+  targetIdInput,
+  incomingClientIdLabel,
+} from "./uiControls";
 import {
   setIncomingCall,
   setIncomingCandidate,
@@ -15,7 +21,7 @@ export function connectToSignalingServer() {
   const signalingServerUrl = import.meta.env.VITE_SIGNALING_SERVER_URL;
   if (!signalingServerUrl) {
     console.error(
-      "O endereço do servidor de sinalização não está configurado!"
+      "Signaling server url not found. Please set VITE_SIGNALING_SERVER_URL in .env file."
     );
     return;
   }
@@ -23,7 +29,7 @@ export function connectToSignalingServer() {
   signalingServerSocket = new WebSocket(signalingServerUrl);
 
   signalingServerSocket.onopen = () => {
-    console.log("Conectado ao servidor de sinalização.");
+    console.log("Connected to signaling server.");
   };
 
   signalingServerSocket.onmessage = (event) => {
@@ -31,20 +37,18 @@ export function connectToSignalingServer() {
     const handler = messageHandler[message.type];
 
     if (!handler) {
-      console.warn(
-        `Não há manipulador para o tipo de mensagem: ${message.type}`
-      );
+      console.warn(`No handler for message type: ${message.type}`);
     }
 
     handler(message);
   };
 
   signalingServerSocket.onerror = (error) => {
-    console.error("Erro na conexão com o servidor de sinalização:", error);
+    console.error("Error connecting to signaling server:", error);
   };
 
   signalingServerSocket.onclose = () => {
-    console.log("Conexão com o servidor de sinalização encerrada.");
+    console.log("Signaling server Connection closed.");
   };
 }
 
@@ -58,7 +62,6 @@ const messageHandler = {
   remote_connection_ready: handleRemoteConnectionReadyMessage,
   cancel_call: handleCancelCallMessage,
 };
-
 
 function handleRemoteConnectionReadyMessage(message) {
   setRemoteConnectionReady();
@@ -86,7 +89,7 @@ function handleCandidateMessage(message) {
 async function handleAnswerMessage(message) {
   const answer = message.answer;
   await setAnswer(answer);
-  
+
   const instance = M.Modal.getInstance(callingModal);
   instance.close();
   stopRinging();
@@ -103,8 +106,8 @@ function handleCancelCallMessage(message) {
 
 function handleEndMessage(message) {
   localEndCall();
- 
-  targetIdInput.value = ""; 
+
+  targetIdInput.value = "";
   stopRinging();
   playEndCall();
 }

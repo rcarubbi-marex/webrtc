@@ -23,6 +23,7 @@
         <button
           id="endCallButton"
           class="btn red darken-2 waves-effect waves-light"
+          disabled
         >
           <i class="material-icons">call_end</i>
         </button>
@@ -31,11 +32,14 @@
 
     <div id="controls">
       <div class="input-field col s3">
-         <a id="videoDeviceSelectTrigger" class='dropdown-trigger btn' href='#' data-target='videoDeviceSelect'>Select Video Device</a>
-         <ul id='videoDeviceSelect' class='dropdown-content'>
-       
-         
-        </ul>
+        <a
+          id="videoDeviceSelectTrigger"
+          class="dropdown-trigger btn"
+          href="#"
+          data-target="videoDeviceSelect"
+          >Select Video Device</a
+        >
+        <ul id="videoDeviceSelect" class="dropdown-content"></ul>
       </div>
       <div class="input-field col s3">
         <input placeholder="Placeholder" id="sourceId" type="text" readonly />
@@ -55,7 +59,9 @@
     <div id="receivingCallModal" class="modal">
       <div class="modal-content">
         <h4>Incoming Call</h4>
-        <p id="modalText">Receiving call from <label id="incomingClientId"></label>...</p>
+        <p id="modalText">
+          Receiving call from <label id="incomingClientId"></label>...
+        </p>
       </div>
       <div class="modal-footer">
         <button id="acceptCall" class="btn green waves-effect waves-light">

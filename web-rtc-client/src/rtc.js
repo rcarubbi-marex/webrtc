@@ -1,6 +1,10 @@
-import { remoteVideo, targetIdInput } from "./uiControls";
+import {
+  remoteVideo,
+  targetIdInput,
+  startCallButton,
+  endCallButton,
+} from "./uiControls";
 import { sendToSignalingServer } from "./signalingClient";
- 
 
 let _localStream;
 let _incomingOffer;
@@ -8,10 +12,16 @@ let _remoteClientId;
 let _localClientId;
 let _peerConnection;
 let _remoteConnectionReady = false;
-export const videoDevices = (
-  await navigator.mediaDevices.enumerateDevices()
-).filter((device) => device.kind === "videoinput");
-export const defaultDeviceId = videoDevices[0].deviceId;
+
+export async function getVideoDevices() {
+  await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+  const videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
+    (device) => device.kind === "videoinput"
+  );
+
+  return videoDevices;
+}
 
 export function setLocalClientId(id) {
   _localClientId = id;
@@ -54,6 +64,9 @@ export function localEndCall() {
     _peerConnection.close();
     _peerConnection = null;
   }
+
+  startCallButton.disabled = false;
+  endCallButton.disabled = true;
 }
 
 async function attachLocalStream(videoDeviceId) {
@@ -85,8 +98,45 @@ export function setRemoteConnectionReady() {
 
 function createPeerConnection() {
   const iceServers = [
-    { urls: "stun:stun.l.google.com:19302" },
-    // { urls: "turn:your-turn-server", username: "user", credential: "pass" },
+    { url: "stun:stun.l.google.com:19302" },
+    { url: "stun:stun1.l.google.com:19302" },
+    { url: "stun:stun2.l.google.com:19302" },
+    { url: "stun:stun3.l.google.com:19302" },
+    {
+      url: "turn:numb.viagenie.ca",
+      credential: "muazkh",
+      username: "webrtc@live.com",
+    },
+    {
+      url: "turn:relay.backups.cz",
+      credential: "webrtc",
+      username: "webrtc",
+    },
+    {
+      url: "turn:relay.backups.cz?transport=tcp",
+      credential: "webrtc",
+      username: "webrtc",
+    },
+    {
+      url: "turn:192.158.29.39:3478?transport=udp",
+      credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+      username: "28224511:1379330808",
+    },
+    {
+      url: "turn:192.158.29.39:3478?transport=tcp",
+      credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+      username: "28224511:1379330808",
+    },
+    {
+      url: "turn:turn.bistri.com:80",
+      credential: "homeo",
+      username: "homeo",
+    },
+    {
+      url: "turn:turn.anyfirewall.com:443?transport=tcp",
+      credential: "webrtc",
+      username: "webrtc",
+    },
   ];
 
   _peerConnection = new RTCPeerConnection({ iceServers });
@@ -100,8 +150,8 @@ function createPeerConnection() {
     .getTracks()
     .forEach((track) => _peerConnection.addTrack(track, _localStream));
 
-  toggleCamera(isDisabled);
-  toggleAudio(isMuted);
+  toggleCamera();
+  toggleAudio();
 
   _peerConnection.ontrack = (event) => {
     remoteVideo.srcObject = event.streams[0];
@@ -169,7 +219,6 @@ export function rejectCall() {
 }
 
 export async function acceptCall(videoDeviceId) {
-
   await attachLocalStream(videoDeviceId);
 
   createPeerConnection();
@@ -188,20 +237,23 @@ export async function acceptCall(videoDeviceId) {
   targetIdInput.value = _remoteClientId;
 }
 
-export function toggleAudio(isMuted) {
-  _localStream.getTracks().forEach(track => {
-   
-    if (track.kind === 'audio') {
-      track.enabled = !isMuted;
+let isMuted = false;
+let cameraDisabled = false;
+
+export function toggleAudio() {
+  isMuted = !isMuted;
+  _localStream.getTracks().forEach((track) => {
+    if (track.kind === "audio") {
+      track.enabled = isMuted;
     }
   });
 }
 
-export function toggleCamera(isDisabled) {
-  _localStream.getTracks().forEach(track => {
-    if (track.kind === 'video') {
-      track.enabled = !isDisabled;
+export function toggleCamera() {
+  cameraDisabled = !cameraDisabled;
+  _localStream.getTracks().forEach((track) => {
+    if (track.kind === "video") {
+      track.enabled = cameraDisabled;
     }
   });
 }
-

@@ -1,6 +1,6 @@
 import ringing from "./assets/ringing.mp3";
 import endCall from "./assets/callend.mp3";
-import startCall from "./assets/callStart.mp3";
+import startCall from "./assets/callstart.mp3";
 
 const ringingAudio = new Audio(ringing);
 const endCallAudio = new Audio(endCall);
@@ -23,4 +23,3 @@ export function stopRinging() {
   ringingAudio.pause();
   ringingAudio.currentTime = 0;
 }
-

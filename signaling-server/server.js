@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
 const wss = new WebSocket.Server({ port: PORT });
 
-console.log(`Servidor de sinalização rodando na porta ${PORT}`);
+console.log(`Signaling server started at ${PORT}`);
 
 const clients = new Map();
 
@@ -29,8 +29,6 @@ function handleEnd(jsonMessage, targetClient) {
   targetClient.send(JSON.stringify(message));
 }
 
-
-
 function handleRemoteConnectionReady(jsonMessage, targetClient) {
   const message = {
     type: "remote_connection_ready",
@@ -44,7 +42,7 @@ function connectClient(ws) {
   const clientId = uuidv4();
   clients.set(clientId, ws);
 
-  const message = { 
+  const message = {
     type: "welcome",
     id: clientId,
   };
@@ -75,7 +73,7 @@ function connectClient(ws) {
   });
 
   ws.on("error", (error) => {
-    console.error(`Erro na conexão com o cliente ${clientId}:`, error);
+    console.error(`Error on connection with client ${clientId}:`, error);
   });
 }
 

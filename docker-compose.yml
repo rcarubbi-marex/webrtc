@@ -4,8 +4,6 @@ services:
       context: ./web-rtc-client
     ports:
       - "8080:80"
-    environment:
-      - VITE_SIGNALING_SERVER_URL=${VITE_SIGNALING_SERVER_URL}
   signaling:
     build:
       context: ./signaling-server
