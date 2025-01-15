@@ -1,7 +1,7 @@
 version: 3
 
 agent:
-  authtoken: 2rfvkdoNjTnIMENjhPp3WBTLcuF_51AUfJuqZihRM4YGQRKax
+  authtoken: <YOUR_NGROK_AUTH_TOKEN>
 
 endpoints:
   - name: signaling
