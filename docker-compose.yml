@@ -1,11 +1,27 @@
 services:
-  frontend:
-    build:
-      context: ./web-rtc-client
-    ports:
-      - "8080:80"
   signaling:
+    container_name: signaling-server
     build:
       context: ./signaling-server
     ports:
       - "3000:3000"
+  ngrok:
+    image: ngrok/ngrok:latest
+    command: start --config /etc/ngrok/ngrok.yml --all
+    volumes:
+      - ./ngrok.yml:/etc/ngrok/ngrok.yml:ro
+    ports:
+      - 4040:4040
+    depends_on:
+      - signaling
+  frontend:
+    build:
+      context: ./web-rtc-client
+      args:
+        - SIGNALING_SERVER_URL=${SIGNALING_SERVER_URL}
+    ports:
+      - "80:80"
+    depends_on:
+      - signaling
+      - ngrok
+  

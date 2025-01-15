@@ -16,6 +16,14 @@ RUN pnpm install --strict
 # Copiar o restante do código para o contêiner
 COPY . .
 
+
+# Argumento para o VITE_SIGNALING_SERVER_URL
+ARG SIGNALING_SERVER_URL
+
+# Define a variável como ambiente
+ENV VITE_SIGNALING_SERVER_URL=${SIGNALING_SERVER_URL}
+
+
 # Construir o projeto com Vite
 RUN pnpm run build
 

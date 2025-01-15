@@ -1,0 +1,14 @@
+version: 3
+
+agent:
+  authtoken: 5RMpMuKEkTQE2XctfCEWj_84ZWLw6sfh1UuBzn9ND8y
+
+endpoints:
+  - name: signaling
+    upstream:
+      url: http://host.docker.internal:3000
+      protocol: http2
+  - name: frontend
+    upstream:
+      url: http://host.docker.internal:80
+      protocol: http1
