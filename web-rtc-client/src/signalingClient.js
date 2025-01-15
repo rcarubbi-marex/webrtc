@@ -61,7 +61,15 @@ const messageHandler = {
   reject: handleRejectMessage,
   remote_connection_ready: handleRemoteConnectionReadyMessage,
   cancel_call: handleCancelCallMessage,
+  ping: handlePingMessage,
 };
+
+function handlePingMessage(message) {
+  const pongMessage = {
+    type: "pong",
+  };
+  sendToSignalingServer(pongMessage);
+}
 
 function handleRemoteConnectionReadyMessage(message) {
   setRemoteConnectionReady();

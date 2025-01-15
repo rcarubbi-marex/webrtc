@@ -24,3 +24,5 @@ $env:SIGNALING_SERVER_URL = $signalingUrl
 Write-Host "Variable SIGNALING_SERVER_URL set: $env:SIGNALING_SERVER_URL"
 
 docker-compose up -d frontend --build
+ 
+  

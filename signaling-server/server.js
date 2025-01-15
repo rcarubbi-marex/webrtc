@@ -5,6 +5,19 @@ const wss = new WebSocket.Server({ port: PORT });
 
 console.log(`Signaling server started at ${PORT}`);
 
+setInterval(() => {
+  console.log("Clients connected:", clients.size);
+
+  for (const [clientId, client] of clients.entries()) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({ type: "ping" }));
+    } else {
+      console.log(`Client ${clientId} is not connected`);
+      clients.delete(clientId);
+    }
+  }
+}, 30000);
+
 const clients = new Map();
 
 wss.on("connection", (ws) => {
@@ -19,6 +32,7 @@ const messageHandlers = {
   remote_connection_ready: handleRemoteConnectionReady,
   end: handleEnd,
   cancel_call: handleCancelCall,
+  pong: () => {},
 };
 
 function handleEnd(jsonMessage, targetClient) {
@@ -54,12 +68,14 @@ function connectClient(ws) {
     const jsonMessage = JSON.parse(message);
     console.log("Received message", jsonMessage);
     const messageType = jsonMessage.type;
-
+    let targetClient;
     if (messageHandlers[messageType]) {
-      const targetClient = clients.get(jsonMessage.remoteClientId);
-      if (!targetClient) {
-        console.warn(`Client not found: ${jsonMessage.remoteClientId}`);
-        return;
+      if (jsonMessage.remoteClientId) {
+        targetClient = clients.get(jsonMessage.remoteClientId);
+        if (!targetClient) {
+          console.warn(`Client not found: ${jsonMessage.remoteClientId}`);
+          return;
+        }
       }
 
       messageHandlers[messageType](jsonMessage, targetClient);

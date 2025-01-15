@@ -4,7 +4,5 @@ import "./style.css";
 import "./uiEvents.js";
 
 import { connectToSignalingServer } from "./signalingClient.js";
-
 console.log(import.meta.env);
-
 connectToSignalingServer();
