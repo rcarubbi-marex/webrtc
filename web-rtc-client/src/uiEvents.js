@@ -55,7 +55,7 @@ startCallButton.addEventListener("click", async () => {
 
   if (!remoteClientId) {
     M.toast({
-      html: "Por favor, insira um ID de destino válido",
+      html: "Please enter a valid client ID",
       classes: "rounded",
       displayLength: 2000,
     });

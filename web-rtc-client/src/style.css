@@ -8,15 +8,34 @@ body, html {
 }
 
 #video-container {
-  padding: 10px;
   position: relative;
-  width: 100%;
-  height: calc(100vh - 120px); 
   background-color: black;
+  padding: 1rem;
 }
 
 #remoteVideo {
-  
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  border: red solid 1px;
+}
+
+#localVideo {
+  position: absolute;
+  min-width: 20%;  
+  bottom: 1.4rem;
+  right: 1rem;
+  border: red solid 1px;
+}
+
+ /* #video-container {
+  padding: 10px;
+  position: relative;
+  height: 80vh; 
+  background-color: black;
+} 
+
+#remoteVideo {
   height: 100%;
   display: block;
   margin: 0 auto;
@@ -24,20 +43,20 @@ body, html {
   border-radius: 8px;
   background-color: black;
   border: 2px solid white;
-   
+  width: 100%;
 }
 
 #localVideo {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 200px;
+  bottom: 0.6rem;
+  right: 0.5rem;
+  width: 15rem;
   height: 150px;
   object-fit: cover;
   border: 2px solid white;
   border-radius: 8px;
   background-color: black;
-}
+} */
 
 #call-controls {
   position: absolute;

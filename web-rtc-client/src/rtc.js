@@ -98,45 +98,69 @@ export function setRemoteConnectionReady() {
 
 function createPeerConnection() {
   const iceServers = [
-    { url: "stun:stun.l.google.com:19302" },
-    { url: "stun:stun1.l.google.com:19302" },
-    { url: "stun:stun2.l.google.com:19302" },
-    { url: "stun:stun3.l.google.com:19302" },
     {
-      url: "turn:numb.viagenie.ca",
-      credential: "muazkh",
-      username: "webrtc@live.com",
+      urls: "stun:stun.relay.metered.ca:80",
     },
     {
-      url: "turn:relay.backups.cz",
-      credential: "webrtc",
-      username: "webrtc",
+      urls: "turn:global.relay.metered.ca:80",
+      username: "8813cbb5cb49c9cb4b9bb8f9",
+      credential: "o21Qt9JBUu2r8KMP",
     },
     {
-      url: "turn:relay.backups.cz?transport=tcp",
-      credential: "webrtc",
-      username: "webrtc",
+      urls: "turn:global.relay.metered.ca:80?transport=tcp",
+      username: "8813cbb5cb49c9cb4b9bb8f9",
+      credential: "o21Qt9JBUu2r8KMP",
     },
     {
-      url: "turn:192.158.29.39:3478?transport=udp",
-      credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-      username: "28224511:1379330808",
+      urls: "turn:global.relay.metered.ca:443",
+      username: "8813cbb5cb49c9cb4b9bb8f9",
+      credential: "o21Qt9JBUu2r8KMP",
     },
     {
-      url: "turn:192.158.29.39:3478?transport=tcp",
-      credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-      username: "28224511:1379330808",
+      urls: "turns:global.relay.metered.ca:443?transport=tcp",
+      username: "8813cbb5cb49c9cb4b9bb8f9",
+      credential: "o21Qt9JBUu2r8KMP",
     },
-    {
-      url: "turn:turn.bistri.com:80",
-      credential: "homeo",
-      username: "homeo",
-    },
-    {
-      url: "turn:turn.anyfirewall.com:443?transport=tcp",
-      credential: "webrtc",
-      username: "webrtc",
-    },
+
+    // { url: "stun:stun.l.google.com:19302" },
+    // { url: "stun:stun1.l.google.com:19302" },
+    // { url: "stun:stun2.l.google.com:19302" },
+    // { url: "stun:stun3.l.google.com:19302" },
+    // {
+    //   url: "turn:numb.viagenie.ca",
+    //   credential: "muazkh",
+    //   username: "webrtc@live.com",
+    // },
+    // {
+    //   url: "turn:relay.backups.cz",
+    //   credential: "webrtc",
+    //   username: "webrtc",
+    // },
+    // {
+    //   url: "turn:relay.backups.cz?transport=tcp",
+    //   credential: "webrtc",
+    //   username: "webrtc",
+    // },
+    // {
+    //   url: "turn:192.158.29.39:3478?transport=udp",
+    //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+    //   username: "28224511:1379330808",
+    // },
+    // {
+    //   url: "turn:192.158.29.39:3478?transport=tcp",
+    //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+    //   username: "28224511:1379330808",
+    // },
+    // {
+    //   url: "turn:turn.bistri.com:80",
+    //   credential: "homeo",
+    //   username: "homeo",
+    // },
+    // {
+    //   url: "turn:turn.anyfirewall.com:443?transport=tcp",
+    //   credential: "webrtc",
+    //   username: "webrtc",
+    // },
   ];
 
   _peerConnection = new RTCPeerConnection({ iceServers });
