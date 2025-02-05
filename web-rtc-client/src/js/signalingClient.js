@@ -1,20 +1,3 @@
-import {
-  sourceIdInput,
-  receivingCallModal,
-  callingModal,
-  targetIdInput,
-  incomingClientIdLabel,
-} from "./uiControls";
-import {
-  setIncomingCall,
-  setIncomingCandidate,
-  setAnswer,
-  localEndCall,
-  setLocalClientId,
-  setRemoteConnectionReady,
-} from "./rtc";
-import { playRinging, playStartCall, stopRinging, playEndCall } from "./fx";
-
 let signalingServerSocket;
 
 export function connectToSignalingServer() {
@@ -72,62 +55,70 @@ function handlePingMessage(message) {
 }
 
 function handleRemoteConnectionReadyMessage(message) {
-  setRemoteConnectionReady();
+  const event = new CustomEvent("remote-connection-ready", {
+    detail: message,
+  });
+
+  document.dispatchEvent(event);
 }
 
 function handleWelcomeMessage(message) {
-  const userId = message.id;
-  setLocalClientId(userId);
-  sourceIdInput.value = userId;
+  const event = new CustomEvent("welcome", {
+    detail: message,
+  });
+
+  document.dispatchEvent(event);
 }
 
 async function handleOfferMessage(message) {
-  setIncomingCall(message.sourceId, message.offer);
-  incomingClientIdLabel.textContent = message.sourceId;
-  const instance = M.Modal.getInstance(receivingCallModal);
-  instance.open();
-  playRinging();
+  const event = new CustomEvent("incoming-call", {
+    detail: message,
+  });
+
+  document.dispatchEvent(event);
 }
 
 function handleCandidateMessage(message) {
-  const candidate = message.candidate;
-  setIncomingCandidate(candidate);
+  const event = new CustomEvent("incoming-candidate", {
+    detail: message,
+  });
+
+  document.dispatchEvent(event);
 }
 
 async function handleAnswerMessage(message) {
-  const answer = message.answer;
-  await setAnswer(answer);
+  const event = new CustomEvent("call-accepted", {
+    detail: message,
+  });
 
-  const instance = M.Modal.getInstance(callingModal);
-  instance.close();
-  stopRinging();
-  playStartCall();
+  document.dispatchEvent(event);
 }
 
 function handleCancelCallMessage(message) {
-  localEndCall();
-  const instance = M.Modal.getInstance(receivingCallModal);
-  instance.close();
-  stopRinging();
-  playEndCall();
+  const event = new CustomEvent("call-cancelled", {
+    detail: message,
+  });
+  document.dispatchEvent(event);
 }
 
 function handleEndMessage(message) {
-  localEndCall();
-
-  targetIdInput.value = "";
-  stopRinging();
-  playEndCall();
+  const event = new CustomEvent("call-ended", {
+    detail: message,
+  });
+  document.dispatchEvent(event);
 }
 
 function handleRejectMessage(message) {
-  localEndCall();
-  const instance = M.Modal.getInstance(callingModal);
-  instance.close();
-  stopRinging();
-  playEndCall();
+  const event = new CustomEvent("call-rejected", {
+    detail: message,
+  });
+  document.dispatchEvent(event);
 }
 
 export function sendToSignalingServer(message) {
+  if (!signalingServerSocket) {
+    connectToSignalingServer();
+  }
+
   signalingServerSocket.send(JSON.stringify(message));
 }

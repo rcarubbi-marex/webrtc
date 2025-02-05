@@ -9,7 +9,7 @@
       rel="stylesheet"
     />
   </head>
-  <body>
+  <body id="main-container" class="container">
     <div id="video-container">
       <video id="remoteVideo" autoplay playsinline></video>
       <video id="localVideo" autoplay playsinline muted></video>
@@ -30,8 +30,8 @@
       </div>
     </div>
 
-    <div id="controls">
-      <div class="input-field col s3">
+    <div id="controls" class="row">
+      <div class="input-field col s12 m12 l3">
         <a
           id="videoDeviceSelectTrigger"
           class="dropdown-trigger btn"
@@ -41,14 +41,14 @@
         >
         <ul id="videoDeviceSelect" class="dropdown-content"></ul>
       </div>
-      <div class="input-field col s3">
+      <div class="input-field col s12 m12 l3">
         <input placeholder="Placeholder" id="sourceId" type="text" readonly />
         <label for="sourceId">Your Id</label>
       </div>
-      <div class="input-field col s3">
+      <div class="input-field col s12 m12 l3">
         <input type="text" id="targetId" placeholder="Enter Target ID" />
       </div>
-      <div class="input-field col s3">
+      <div class="input-field col s12 m12 l3">
         <button id="startCallButton" class="btn waves-effect waves-light">
           <i class="material-icons left">call</i>Start Call
         </button>
@@ -85,6 +85,6 @@
       </div>
     </div>
 
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/js/main.js"></script>
   </body>
 </html>

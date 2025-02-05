@@ -1,15 +1,8 @@
-import {
-  remoteVideo,
-  targetIdInput,
-  startCallButton,
-  endCallButton,
-} from "./uiControls";
 import { sendToSignalingServer } from "./signalingClient";
 
 let _localStream;
-let _incomingOffer;
-let _remoteClientId;
 let _localClientId;
+let _incomingOffer;
 let _peerConnection;
 let _remoteConnectionReady = false;
 
@@ -32,30 +25,30 @@ export function setIncomingCandidate(candidate) {
 }
 
 export function endCall() {
-  localEndCall();
+  closePeerConnection();
   remoteEndCall();
 }
 
-export function remoteEndCall() {
+export function remoteEndCall(remoteClientId) {
   sendToSignalingServer({
     type: "end",
-    remoteClientId: _remoteClientId,
+    remoteClientId: remoteClientId,
   });
 }
 
 export function cancelCall() {
-  localEndCall();
+  closePeerConnection();
   remoteCancelCall();
 }
 
-export function remoteCancelCall() {
+export function remoteCancelCall(remoteClientId) {
   sendToSignalingServer({
     type: "cancel_call",
-    remoteClientId: _remoteClientId,
+    remoteClientId: remoteClientId,
   });
 }
 
-export function localEndCall() {
+export function closePeerConnection() {
   if (_localStream) {
     detachLocalStream();
   }
@@ -64,9 +57,6 @@ export function localEndCall() {
     _peerConnection.close();
     _peerConnection = null;
   }
-
-  startCallButton.disabled = false;
-  endCallButton.disabled = true;
 }
 
 async function attachLocalStream(videoDeviceId) {
@@ -84,19 +74,19 @@ function detachLocalStream() {
 
 const pendingCandidates = new Set();
 
-export function setRemoteConnectionReady() {
+export function setRemoteConnectionReady(remoteClientId) {
   _remoteConnectionReady = true;
   pendingCandidates.forEach((candidate) => {
     sendToSignalingServer({
       type: "iceCandidate",
-      remoteClientId: _remoteClientId,
+      remoteClientId: remoteClientId,
       candidate: candidate,
     });
   });
   pendingCandidates.clear();
 }
 
-function createPeerConnection() {
+function createPeerConnection(remoteClientId) {
   const iceServers = [
     {
       urls: "stun:stun.relay.metered.ca:80",
@@ -121,64 +111,28 @@ function createPeerConnection() {
       username: "8813cbb5cb49c9cb4b9bb8f9",
       credential: "o21Qt9JBUu2r8KMP",
     },
-
-    // { url: "stun:stun.l.google.com:19302" },
-    // { url: "stun:stun1.l.google.com:19302" },
-    // { url: "stun:stun2.l.google.com:19302" },
-    // { url: "stun:stun3.l.google.com:19302" },
-    // {
-    //   url: "turn:numb.viagenie.ca",
-    //   credential: "muazkh",
-    //   username: "webrtc@live.com",
-    // },
-    // {
-    //   url: "turn:relay.backups.cz",
-    //   credential: "webrtc",
-    //   username: "webrtc",
-    // },
-    // {
-    //   url: "turn:relay.backups.cz?transport=tcp",
-    //   credential: "webrtc",
-    //   username: "webrtc",
-    // },
-    // {
-    //   url: "turn:192.158.29.39:3478?transport=udp",
-    //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-    //   username: "28224511:1379330808",
-    // },
-    // {
-    //   url: "turn:192.158.29.39:3478?transport=tcp",
-    //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-    //   username: "28224511:1379330808",
-    // },
-    // {
-    //   url: "turn:turn.bistri.com:80",
-    //   credential: "homeo",
-    //   username: "homeo",
-    // },
-    // {
-    //   url: "turn:turn.anyfirewall.com:443?transport=tcp",
-    //   credential: "webrtc",
-    //   username: "webrtc",
-    // },
   ];
 
   _peerConnection = new RTCPeerConnection({ iceServers });
 
   sendToSignalingServer({
     type: "remote_connection_ready",
-    remoteClientId: _remoteClientId,
+    remoteClientId: remoteClientId,
   });
 
   _localStream
     .getTracks()
     .forEach((track) => _peerConnection.addTrack(track, _localStream));
 
-  toggleCamera();
-  toggleAudio();
+  refreshAudioStream();
+  refreshVideoStream();
 
   _peerConnection.ontrack = (event) => {
-    remoteVideo.srcObject = event.streams[0];
+    const customEvent = new CustomEvent("remote-track-received", {
+      detail: event,
+    });
+
+    document.dispatchEvent(customEvent);
   };
 
   _peerConnection.onicecandidate = (event) => {
@@ -190,7 +144,7 @@ function createPeerConnection() {
     } else {
       sendToSignalingServer({
         type: "iceCandidate",
-        remoteClientId: _remoteClientId,
+        remoteClientId: remoteClientId,
         candidate: event.candidate,
       });
     }
@@ -202,17 +156,14 @@ function createPeerConnection() {
 export async function initiateCall(remoteClientId, videoDeviceId) {
   try {
     await attachLocalStream(videoDeviceId);
-    _remoteClientId = remoteClientId;
-
-    createPeerConnection();
-
+    createPeerConnection(remoteClientId);
     const offer = await _peerConnection.createOffer();
     await _peerConnection.setLocalDescription(offer);
 
     sendToSignalingServer({
       type: "offer",
       localClientId: _localClientId,
-      remoteClientId: _remoteClientId,
+      remoteClientId: remoteClientId,
       offer: _peerConnection.localDescription,
     });
   } catch (error) {
@@ -227,8 +178,7 @@ export async function setAnswer(answer) {
 
 /* receiver functions */
 
-export function setIncomingCall(remoteClientId, offer) {
-  _remoteClientId = remoteClientId;
+export function setIncomingCall(offer) {
   _incomingOffer = offer;
 }
 
@@ -242,10 +192,10 @@ export function rejectCall() {
   _remoteClientId = null;
 }
 
-export async function acceptCall(videoDeviceId) {
+export async function acceptCall(videoDeviceId, remoteClientId) {
   await attachLocalStream(videoDeviceId);
 
-  createPeerConnection();
+  createPeerConnection(remoteClientId);
 
   _peerConnection.setRemoteDescription(_incomingOffer);
 
@@ -254,11 +204,17 @@ export async function acceptCall(videoDeviceId) {
 
   sendToSignalingServer({
     type: "answer",
-    remoteClientId: _remoteClientId,
+    remoteClientId: remoteClientId,
     answer: _peerConnection.localDescription,
   });
 
-  targetIdInput.value = _remoteClientId;
+  const event = new CustomEvent("call-acknowledged", {
+    details: {
+      remoteClientId: remoteClientId,
+    },
+  });
+
+  document.dispatchEvent(event);
 }
 
 let isMuted = false;
@@ -266,18 +222,38 @@ let cameraDisabled = false;
 
 export function toggleAudio() {
   isMuted = !isMuted;
-  _localStream.getTracks().forEach((track) => {
-    if (track.kind === "audio") {
-      track.enabled = isMuted;
-    }
-  });
+  refreshAudioStream();
+}
+
+export function refreshAudioStream() {
+  if (_localStream) {
+    _localStream.getTracks().forEach((track) => {
+      if (track.kind === "audio") {
+        track.enabled = !isMuted;
+      }
+    });
+  }
+}
+
+export function getIsMuted() {
+  return isMuted;
+}
+
+export function getCameraDisabled() {
+  return cameraDisabled;
 }
 
 export function toggleCamera() {
   cameraDisabled = !cameraDisabled;
-  _localStream.getTracks().forEach((track) => {
-    if (track.kind === "video") {
-      track.enabled = cameraDisabled;
-    }
-  });
+  refreshVideoStream();
+}
+
+export function refreshVideoStream() {
+  if (_localStream) {
+    _localStream.getTracks().forEach((track) => {
+      if (track.kind === "video") {
+        track.enabled = !cameraDisabled;
+      }
+    });
+  }
 }
